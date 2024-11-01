@@ -8,15 +8,17 @@ namespace Figures
         private int vertexBufferHandle;
         private int shaderProgramHandle;
         private int vertexArrayHandle;
+        private int colorLocation;
         private string vertexPath = "./shaders/shader.vert";
         private string fragmentPath = "./shaders/shader.frag";
 
-        public Triangle(float[] vertices)
+        public Triangle(float[] vertices, float[] color)
         {
             this.vertices = vertices;
+            this.Color = color;
         }
 
-        public void Load()
+        public override void Load()
         {
             this.vertexBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, this.vertexBufferHandle);
@@ -55,20 +57,28 @@ namespace Figures
             GL.AttachShader(this.shaderProgramHandle, vertexShaderHandle);
             GL.AttachShader(this.shaderProgramHandle, fragmentShaderHandle);
             GL.LinkProgram(this.shaderProgramHandle);
+            this.colorLocation = GL.GetUniformLocation(this.shaderProgramHandle, "customColor");
             GL.DetachShader(this.shaderProgramHandle, vertexShaderHandle);
             GL.DetachShader(this.shaderProgramHandle, fragmentShaderHandle);
             GL.DeleteShader(vertexShaderHandle);
             GL.DeleteShader(fragmentShaderHandle);
         }
 
-        public void Render()
+        public override void Render()
         {
             GL.UseProgram(this.shaderProgramHandle);
             GL.BindVertexArray(this.vertexArrayHandle);
+            GL.Uniform4(
+                this.colorLocation,
+                this.Color[0],
+                this.Color[1],
+                this.Color[2],
+                this.Color[3]
+            );
             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
         }
 
-        public void Unload()
+        public override void Unload()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.DeleteBuffer(this.vertexBufferHandle);
